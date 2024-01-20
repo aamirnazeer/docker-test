@@ -1,0 +1,17 @@
+apiVersion: skaffold/v4beta9
+kind: Config
+metadata:
+  name: docker-test
+build:
+  artifacts:
+    - image: app1
+      context: app1
+      docker:
+        dockerfile: Dockerfile
+    - image: app2
+      context: app2
+      docker:
+        dockerfile: Dockerfile
+manifests:
+  rawYaml:
+    - k8s/*.yaml
