@@ -19,6 +19,8 @@ server.get('/a', async (req, res) => {
   res.send({ message: 'a nats success' });
 });
 
+stan.publish('testSubject', { hello: 'kukul from file straight' });
+
 server.get('/nats', async (req, res) => {
   stan.publish('testSubject', { hello: 'kukul' });
   res.send({ message: 'req success' });
