@@ -2,7 +2,7 @@ import express from 'express';
 import { config } from 'dotenv';
 import { json } from 'express';
 import { JSONCodec } from 'nats';
-import { stan } from './nats';
+import NatsWrapper from './tla';
 
 const server = express();
 const jc = JSONCodec();
@@ -20,6 +20,7 @@ server.get('/a', async (req, res) => {
 });
 
 server.get('/nats', async (req, res) => {
+  const stan = await NatsWrapper();
   stan.publish('testSubject', { hello: 'kukul' });
   res.send({ message: 'req success' });
 });
