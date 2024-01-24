@@ -1,8 +1,8 @@
-import { connect, JSONCodec, Subscription } from 'nats';
+import { connect, JSONCodec, Subscription, NatsConnection } from 'nats';
 
 const jc = JSONCodec();
 
-let instance: Awaited<ReturnType<typeof connect>>;
+let instance: NatsConnection;
 
 async function NatsWrapper() {
   if (!instance) {
@@ -31,4 +31,13 @@ async function subscribe(
   return subscription;
 }
 
-export const stan = { publish, subscribe };
+async function disconnect(): Promise<void> {
+  const inst = await NatsWrapper();
+  if (inst) {
+    await inst.drain();
+    await inst.close();
+    console.log('Disconnected from NATS');
+  }
+}
+
+export const stan = { publish, subscribe, disconnect };
