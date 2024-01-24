@@ -1,55 +1,34 @@
-import { connect, NatsConnection, Subscription, JSONCodec } from 'nats';
+import { connect, JSONCodec, Subscription } from 'nats';
 
-class NatsClient {
-  private connection: NatsConnection | null = null;
-  private jsonCodec = JSONCodec();
+const jc = JSONCodec();
 
-  constructor() {}
+let instance: Awaited<ReturnType<typeof connect>>;
 
-  async connect(url: string) {
-    if (this.connection) {
-      console.warn('Already connected to NATS');
-      return;
-    }
-
-    try {
-      this.connection = await connect({ servers: url, noEcho: true });
-      console.log('Connected to NATS');
-      return;
-    } catch (error) {
-      console.error('Error connecting to NATS:', error);
-      throw error;
-    }
+async function NatsWrapper() {
+  if (!instance) {
+    instance = await connect({ servers: 'http://my-nats:4222', noEcho: true });
+    console.log('connected to NATS');
   }
-
-  async disconnect(): Promise<void> {
-    if (this.connection) {
-      await this.connection.drain();
-      await this.connection.close();
-      this.connection = null;
-      console.log('Disconnected from NATS');
-    }
-  }
-
-  async publish(subject: string, data: any): Promise<void> {
-    if (!this.connection) {
-      throw new Error('Not connected to NATS');
-    }
-    this.connection.publish(subject, this.jsonCodec.encode(data));
-  }
-
-  subscribe(subject: string, callback: (data: any) => void): Subscription {
-    if (!this.connection) {
-      throw new Error('Not connected to NATS');
-    }
-    const subscription = this.connection.subscribe(subject);
-    (async () => {
-      for await (const message of subscription) {
-        callback(this.jsonCodec.decode(message.data));
-      }
-    })();
-    return subscription;
-  }
+  return instance;
 }
 
-export const stan = new NatsClient();
+async function publish(subject: string, data: any) {
+  const inst = await NatsWrapper();
+  inst.publish(subject, jc.encode(data));
+}
+
+async function subscribe(
+  subject: string,
+  callback: (data: any) => void
+): Promise<Subscription> {
+  const inst = await NatsWrapper();
+  const subscription = inst.subscribe(subject);
+  (async () => {
+    for await (const message of subscription) {
+      callback(jc.decode(message.data));
+    }
+  })();
+  return subscription;
+}
+
+export const stan = { publish, subscribe };

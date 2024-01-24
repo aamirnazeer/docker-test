@@ -9,15 +9,6 @@ const start = async () => {
     throw new Error('VARIABLE not found');
   }
 
-  await stan
-    .connect('http://my-nats:4222')
-    .then(() => {
-      console.log('Successfully connected to NATS');
-    })
-    .catch((error) => {
-      console.error('Failed to connect to NATS:', error);
-    });
-
   // Subscribe to a subject
   stan.subscribe('testSubject', (data) => {
     console.log('Received data:', data);
