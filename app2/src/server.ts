@@ -8,6 +8,4 @@ server.get('/', (req, res) => {
   res.send({ message: 'success from new', variable: process.env.VARIABLE });
 });
 
-console.log('hello');
-
 export { server };
