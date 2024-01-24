@@ -3,15 +3,25 @@ kind: Config
 metadata:
   name: docker-test
 build:
+  local:
+    push: false
   artifacts:
     - image: app1
       context: app1
       docker:
         dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/***/*.ts'
+            dest: .
     - image: app2
       context: app2
       docker:
         dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/***/*.ts'
+            dest: .
 manifests:
   rawYaml:
     - k8s/*.yaml
