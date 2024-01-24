@@ -1,10 +1,12 @@
 import express from 'express';
 import { config } from 'dotenv';
 import { json } from 'express';
-import { connect, JSONCodec } from 'nats';
+import { JSONCodec } from 'nats';
+import { stan } from './nats';
 
 const server = express();
 const jc = JSONCodec();
+
 config();
 
 server.use(json());
@@ -18,8 +20,7 @@ server.get('/a', async (req, res) => {
 });
 
 server.get('/nats', async (req, res) => {
-  const nc = await connect({ servers: 'http://my-nats:4222', noEcho: true });
-  nc.publish('test', jc.encode({ message: 'i am kukul' }));
+  stan.publish('testSubject', { hello: 'kukul' });
   res.send({ message: 'req success' });
 });
 
